@@ -1,9 +1,10 @@
-import { utm } from './coordinates';
+import { utm, btm } from './coordinates';
 
 export type Loc = {
   id: string; name: string; latitude: number; longitude: number; notes: string;
   createdAt: string; updatedAt: string; accuracy?: number; source: 'gps' | 'manual';
   zone?: number; hemi?: 'N' | 'S'; easting?: number; northing?: number; crs?: string;
+  btmEasting?: number; btmNorthing?: number; btmInBounds?: boolean;
 };
 
 const KEY = 'tactical-compass.locations.v1';
@@ -56,6 +57,10 @@ export function parseData(s: string): Loc[] {
       const u = utm(latitude, longitude);
       loc.zone = u.zone; loc.hemi = u.hemi; loc.easting = u.easting; loc.northing = u.northing; loc.crs = u.crs;
     } catch { /* outside UTM limits */ }
+    try {
+      const b = btm(latitude, longitude);
+      loc.btmEasting = b.easting; loc.btmNorthing = b.northing; loc.btmInBounds = b.inBounds;
+    } catch { /* invalid lat/lon */ }
     return loc;
   });
 }
